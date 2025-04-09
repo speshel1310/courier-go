@@ -2,29 +2,18 @@ class Game {
     constructor() {
         this.score = 0;
         this.lives = 3;
+        this.isJumping = false;
         this.currentLane = 1; // 0: left, 1: center, 2: right
         this.obstacles = [];
         this.coins = [];
         this.gameInterval = null;
         this.isGameOver = false;
         this.targetScore = 200;
+        this.isMuted = true; // Начинаем с выключенным звуком
 
-        // --- AUDIO SIMPLIFIED ---
-        // Инициализация ТОЛЬКО фонового аудио
-        this.audio = {
-            background: null // Инициализируем как null на случай ошибки загрузки
-        };
-        try {
-            // Убедитесь, что файл 'audio/background.mp3' существует!
-            this.audio.background = new Audio('audio/background.mp3');
-            this.audio.background.loop = true;
-            this.audio.background.volume = 0.5;
-        } catch (error) {
-            console.error("Error loading background audio:", error);
-        }
-
-        this.isMuted = false;
-
+        // Инициализация аудио
+        this.initializeAudio();
+        
         // Определяем типы препятствий
         this.obstacleTypes = [
             { emoji: '🐕', name: 'собака' },
@@ -41,6 +30,34 @@ class Game {
         this.clearGame();
         // Start the game
         this.startGame();
+    }
+
+    initializeAudio() {
+        try {
+            this.audio = {
+                background: new Audio('audio/background.mp3'),
+                coin: new Audio('audio/coin.mp3'),
+                collision: new Audio('audio/collision.mp3'),
+                jump: new Audio('audio/jump.mp3'),
+                gameOver: new Audio('audio/gameover.mp3'),
+                win: new Audio('audio/win.mp3')
+            };
+
+            // Настройка фоновой музыки
+            if (this.audio.background) {
+                this.audio.background.loop = true;
+                this.audio.background.volume = 0;  // Начальная громкость 0
+            }
+
+            // Настройка звуковых эффектов
+            Object.values(this.audio).forEach(sound => {
+                if (sound && sound !== this.audio.background) {
+                    sound.volume = 0;  // Начальная громкость 0
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при инициализации аудио:', error);
+        }
     }
 
     initializeElements() {
@@ -66,26 +83,31 @@ class Game {
         if (this.winScreen) this.winScreen.classList.add('hidden');
 
         // Добавляем кнопку звука в игровую область
-        const soundButton = document.createElement('button');
-        soundButton.id = 'sound-toggle';
-        soundButton.innerHTML = this.isMuted ? '🔇' : '🔊';
-        soundButton.className = 'sound-button';
-
-        // Добавляем кнопку в gameArea
-        if (this.gameArea) {
-            this.gameArea.appendChild(soundButton);
-            soundButton.addEventListener('click', () => {
-                this.toggleSound();
-                soundButton.innerHTML = this.isMuted ? '🔇' : '🔊';
-            });
-        } else {
-            console.error("Game area not found for sound button!");
-        }
+        this.initializeSoundButton();
 
         // Устанавливаем слушатели событий
         this.setupEventListeners();
         // Устанавливаем начальное положение игрока
         this.updatePlayerPosition();
+    }
+
+    initializeSoundButton() {
+        try {
+            const soundButton = document.createElement('button');
+            soundButton.id = 'sound-toggle';
+            soundButton.innerHTML = '🔇'; // Начинаем с иконки выключенного звука
+            soundButton.className = 'sound-button';
+
+            if (this.gameArea) {
+                this.gameArea.appendChild(soundButton);
+                soundButton.addEventListener('click', () => {
+                    this.toggleSound();
+                    soundButton.innerHTML = this.isMuted ? '🔇' : '🔊';
+                });
+            }
+        } catch (error) {
+            console.error('Ошибка при инициализации кнопки звука:', error);
+        }
     }
 
     clearGame() {
@@ -156,20 +178,22 @@ class Game {
             btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); if (!this.isGameOver) this.moveLeft(); });
             btnLeft.addEventListener('click', () => { if (!this.isGameOver) this.moveLeft(); });
         }
-         if (btnRight) {
+        if (btnRight) {
             btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); if (!this.isGameOver) this.moveRight(); });
             btnRight.addEventListener('click', () => { if (!this.isGameOver) this.moveRight(); });
         }
 
-        // Кнопки рестарта
+        // Кнопки рестарта - добавляем все возможные кнопки
         const restartButtons = [
             document.getElementById('restart'),
+            document.getElementById('play-again'),
             document.getElementById('play-again-win')
         ];
 
         restartButtons.forEach(button => {
             if (button) {
                 button.addEventListener('click', () => {
+                    console.log('Restart button clicked'); // Добавляем для отладки
                     this.restartGame();
                 });
             }
@@ -373,42 +397,77 @@ class Game {
     }
 
     restartGame() {
-        clearInterval(this.gameInterval);
-        this.stopSound(); // Останавливаем музыку перед рестартом
-        if (this.audio.background) {
-            this.audio.background.currentTime = 0; // Сброс позиции
+        try {
+            console.log('Restarting game...'); // Добавляем для отладки
+            
+            // Очищаем интервал
+            if (this.gameInterval) {
+                clearInterval(this.gameInterval);
+            }
+
+            // Сбрасываем состояние игры
+            this.score = 0;
+            this.lives = 3;
+            this.isGameOver = false;
+            this.currentLane = 1;
+
+            // Очищаем игровое поле
+            this.clearGame();
+
+            // Обновляем UI
+            if (this.scoreElement) {
+                this.scoreElement.textContent = '0';
+            }
+            if (this.livesElement) {
+                this.livesElement.textContent = '❤️❤️❤️';
+            }
+
+            // Скрываем экраны
+            if (this.gameOverScreen) {
+                this.gameOverScreen.classList.add('hidden');
+            }
+            if (this.winScreen) {
+                this.winScreen.classList.add('hidden');
+            }
+
+            // Обновляем позицию игрока
+            this.updatePlayerPosition();
+
+            // Перезапускаем звук
+            this.stopSound();
+            if (this.audio.background) {
+                this.audio.background.currentTime = 0;
+            }
+
+            // Запускаем игру заново
+            this.startGame();
+        } catch (error) {
+            console.error('Error in restartGame:', error);
         }
-
-        this.score = 0;
-        this.lives = 3;
-        this.isGameOver = false;
-        this.currentLane = 1;
-        this.clearGame();
-
-        if (this.scoreElement) this.scoreElement.textContent = this.score;
-        if (this.livesElement) this.livesElement.textContent = '❤️'.repeat(this.lives);
-        if (this.gameOverScreen) this.gameOverScreen.classList.add('hidden');
-        if (this.winScreen) this.winScreen.classList.add('hidden');
-
-        this.updatePlayerPosition();
-        this.startGame(); // Запускает playSound() внутри
     }
 
     // --- AUDIO METHODS SIMPLIFIED ---
     toggleSound() {
         this.isMuted = !this.isMuted;
+        
+        // Установка громкости для фоновой музыки
         if (this.audio.background) {
-            this.audio.background.muted = this.isMuted;
-            // Попытка воспроизвести, если включили звук и музыка на паузе
-            if (!this.isMuted && this.audio.background.paused) {
-                this.playSound();
-            }
+            this.audio.background.volume = this.isMuted ? 0 : 0.5;
         }
-         // Обновляем иконку кнопки (добавлено сюда для централизации)
-         const soundButton = document.getElementById('sound-toggle');
-         if (soundButton) {
-              soundButton.innerHTML = this.isMuted ? '🔇' : '🔊';
-         }
+        
+        // Установка громкости для звуковых эффектов
+        Object.values(this.audio).forEach(sound => {
+            if (sound && sound !== this.audio.background) {
+                sound.volume = this.isMuted ? 0 : 0.3;
+            }
+        });
+
+        // Если звук включен и игра идет, запускаем фоновую музыку
+        if (!this.isMuted && !this.isGameOver && this.audio.background) {
+            this.audio.background.play().catch(error => {
+                console.error('Ошибка воспроизведения звука:', error);
+            });
+        }
     }
 
     // Воспроизводит ТОЛЬКО фоновую музыку
