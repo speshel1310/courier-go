@@ -8,7 +8,7 @@ class Game {
         this.coins = [];
         this.gameInterval = null;
         this.isGameOver = false;
-        this.targetScore = 200;
+        this.targetScore = 300;
         this.isMuted = true; // Начинаем с выключенным звуком
 
         // Инициализация аудио
