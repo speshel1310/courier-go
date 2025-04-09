@@ -4,13 +4,12 @@
     box-sizing: border-box;
 }
 
-@font-face {
-    font-family: 'Cyber';
-    src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-}
+/* Подключаем шрифт Orbitron */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
 
 body {
-    font-family: 'Orbitron', Arial, sans-serif;
+    font-family: 'Orbitron', Arial, sans-serif; /* Применяем шрифт */
     background-color: #000;
     display: flex;
     justify-content: center;
@@ -18,14 +17,19 @@ body {
     min-height: 100vh;
     color: #fff;
     background: linear-gradient(45deg, #000000, #1a1a1a);
+    /* Добавим для предотвращения выделения текста на мобильных при тапе */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .game-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 450px; /* Уменьшим максимальную ширину для лучшего вида на мобильных */
     background-color: rgba(0, 0, 0, 0.8);
     border-radius: 10px;
-    padding: 20px;
+    padding: 15px; /* Уменьшим padding */
     box-shadow: 0 0 20px rgba(255, 214, 0, 0.3);
     position: relative;
     border: 2px solid #ffd600;
@@ -37,326 +41,405 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 8px 15px; /* Уменьшим padding */
     background: rgba(0, 0, 0, 0.8);
     color: #ffd600;
+    min-height: 45px; /* Скорректируем минимальную высоту */
+    margin-bottom: 10px; /* Добавим небольшой отступ снизу */
+    border-bottom: 1px solid rgba(255, 214, 0, 0.5); /* Разделительная линия */
+}
+
+/* Элементы внутри шапки (Очки и Жизни) */
+/* Используем классы, если вы их добавили, иначе first/last-child */
+.score-display, /* Предполагаемый класс для очков */
+.lives-display, /* Предполагаемый класс для жизней */
+.game-header > div:first-child, /* Фоллбэк, если классов нет */
+.game-header > div:last-child {  /* Фоллбэк, если классов нет */
+     font-size: 0.9em; /* Уменьшим немного базовый размер */
+     font-weight: bold;
+     white-space: nowrap;
+     flex-shrink: 0; /* Не сжимать сильно */
+     letter-spacing: 1px;
 }
 
 .logo {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    /* Логотип теперь как обычный flex-item */
+    flex-grow: 0;
+    flex-shrink: 1;
+    text-align: center;
     font-family: 'Orbitron', sans-serif;
-    font-size: 28px;
+    font-size: 20px; /* Уменьшим базовый размер */
     font-weight: bold;
     color: #FFD600;
-    letter-spacing: 2px;
-    text-shadow: 
-        2px 2px 0 #000,
-        -2px -2px 0 #000,
-        2px -2px 0 #000,
-        -2px 2px 0 #000;
-    -webkit-text-stroke: 1px #000;
+    letter-spacing: 1px;
+    text-shadow:
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000;
+    margin: 0 8px; /* Уменьшим отступы */
+    /* Добавим обрезку текста на всякий случай */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%; /* Ограничим ширину */
 }
 
-.logo::before {
-    content: '🛵';
-    font-size: 28px;
-    margin-right: 5px;
-}
+/* Убрали .logo::before */
 
 .game-area {
-    position: relative;
+    position: relative; /* Для позиционирования дочерних */
     width: 100%;
-    height: 400px;
+    height: 400px; /* Основная высота */
     background-color: #000;
     overflow: hidden;
-    border: 2px solid #ffd600;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    border: 1px solid rgba(255, 214, 0, 0.5); /* Тоньше рамка */
+    border-radius: 8px; /* Меньше скругление */
+    margin-bottom: 15px; /* Отступ до контролов */
 }
 
-.lane {
+/* Разделители полос */
+.lane-divider {
     position: absolute;
-    width: 33.33%;
-    height: 100%;
-    border-right: 2px dashed rgba(255, 214, 0, 0.3);
+    top: 0;
+    bottom: 0;
+    width: 2px; /* Ширина линии */
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 214, 0, 0.4),
+        rgba(255, 214, 0, 0.4) 10px, /* Длина штриха */
+        transparent 10px,
+        transparent 20px /* Длина пропуска */
+    );
 }
-
-.lane.left {
-    left: 0;
-}
-
-.lane.center {
+.lane-divider.left {
     left: 33.33%;
+    transform: translateX(-1px); /* Центрируем линию */
+}
+.lane-divider.right {
+    left: 66.66%;
+     transform: translateX(-1px); /* Центрируем линию */
 }
 
-.lane.right {
-    left: 66.66%;
-    border-right: none;
-}
 
 #player {
     position: absolute;
-    bottom: 20px;
-    left: 33.33%;
+    bottom: 15px; /* Немного ниже */
+    /* left устанавливается из JS */
     transform: translateX(-50%);
-    font-size: 2em;
-    transition: left 0.2s;
+    font-size: 2em; /* Размер игрока */
+    transition: left 0.15s ease-out; /* Чуть быстрее анимация */
     z-index: 10;
-    filter: drop-shadow(0 0 10px #ffd600);
+    filter: drop-shadow(0 0 8px #ffd600); /* Меньше свечение */
+    /* Добавим картинку, если нужно */
+    /* content: url('path/to/player-image.png'); */
+    /* width: 40px; */
+    /* height: auto; */
 }
 
 .obstacle {
     position: absolute;
-    width: 40px;
-    height: 40px;
-    font-size: 2em;
+    width: 35px; /* Уменьшим размер */
+    height: 35px;
+    font-size: 1.8em; /* Уменьшим эмодзи */
     z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.7));
-    animation: obstacleShake 0.5s infinite;
-    transform-origin: center bottom;
+    filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+    /* Анимацию можно упростить или убрать, если мешает */
+    /* animation: obstacleShake 0.5s infinite; */
+    transform-origin: center center;
 }
 
-@keyframes obstacleShake {
-    0% { transform: translateX(0) rotate(0deg); }
-    25% { transform: translateX(-2px) rotate(-2deg); }
-    75% { transform: translateX(2px) rotate(2deg); }
-    100% { transform: translateX(0) rotate(0deg); }
-}
+/* @keyframes obstacleShake { ... } */ /* Можно закомментировать */
 
 .coin {
     position: absolute;
-    width: 30px;
-    height: 30px;
-    font-size: 1.5em;
+    width: 28px; /* Уменьшим */
+    height: 28px;
+    font-size: 1.4em; /* Уменьшим */
     z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(0 0 10px #ffd600);
-    animation: coinPulse 1s infinite;
+    filter: drop-shadow(0 0 8px #ffd600);
+    animation: coinPulse 1.2s infinite ease-in-out; /* Чуть медленнее */
 }
 
 @keyframes coinPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
 }
 
 .game-controls {
-    margin-top: 20px;
+    margin-top: 15px;
     text-align: center;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 1em;
+/* Стилизация кнопок по умолчанию (например, кнопка рестарта) */
+.restart-button { /* Дайте кнопке рестарта этот класс */
+    padding: 10px 25px;
+    font-size: 1.1em;
     background-color: #ffd600;
     color: #000;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s ease;
     font-family: 'Orbitron', Arial, sans-serif;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    box-shadow: 0 0 15px rgba(255, 214, 0, 0.5);
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 10px rgba(255, 214, 0, 0.4);
+    font-weight: bold;
 }
 
-button:hover {
+.restart-button:hover {
     background-color: #fff;
-    box-shadow: 0 0 20px rgba(255, 214, 0, 0.8);
-    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 214, 0, 0.6);
+    transform: translateY(-1px);
+}
+.restart-button:active {
+    transform: translateY(1px);
+     box-shadow: 0 2px 5px rgba(255, 214, 0, 0.3);
 }
 
+
+/* Скрытие элементов */
 .hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
+    display: none !important; /* Используем !important для надежности */
 }
 
+/* Экраны Game Over и Win */
 #game-over, #win-screen {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
+    /* Размеры больше не нужны, они займут всю родительскую область */
+    background-color: rgba(0, 0, 0, 0.85); /* Чуть плотнее фон */
+    display: flex; /* Используем flex для центрирования контента */
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px);
+    padding: 20px; /* Добавим отступы */
+    /* Плавное появление */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+/* Когда экран должен быть виден (класс НЕ hidden) */
+#game-over:not(.hidden),
+#win-screen:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
 }
 
+
 .game-over-content, .win-content {
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 30px;
-    border-radius: 10px;
+    background-color: rgba(10, 10, 10, 0.9); /* Темнее фон контента */
+    padding: 25px;
+    border-radius: 8px;
     text-align: center;
-    min-width: 280px;
-    border: 2px solid #ffd600;
-    box-shadow: 0 0 30px rgba(255, 214, 0, 0.3);
-    color: #fff;
+    width: 90%; /* Ширина относительно родителя (#game-over/#win-screen) */
+    max-width: 350px; /* Максимальная ширина контента */
+    border: 1px solid #ffd600;
+    box-shadow: 0 0 25px rgba(255, 214, 0, 0.25);
+    color: #eee; /* Светлее текст */
 }
 
 .game-over-content h2, .win-content h2 {
     color: #ffd600;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px #ffd600;
-}
-
-.promo-code {
-    font-weight: bold;
-    color: #ffd600;
-    font-size: 1.4em;
-    text-shadow: 0 0 10px #ffd600;
-    letter-spacing: 2px;
-    padding: 10px;
-    border: 1px dashed #ffd600;
-    display: inline-block;
-    margin: 10px 0;
-}
-
-.mobile-controls {
-    display: none;
-    justify-content: space-between;
-    padding: 0 20%;
-    margin-top: 20px;
-}
-
-.mobile-controls button {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 2px solid #ffd600;
-    color: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-}
-
-.mobile-controls button:active {
-    background-color: #fff;
-    box-shadow: 0 0 20px rgba(255, 214, 0, 0.8);
-}
-
-@media (max-width: 600px) {
-    .game-container {
-        padding: 10px;
-    }
-    
-    .game-header {
-        font-size: 1em;
-    }
-    
-    .game-area {
-        height: 300px;
-    }
-
-    .mobile-controls {
-        display: flex;
-    }
-}
-
-.error-message {
-    color: #ff0033;
-    text-shadow: 0 0 10px #ff0033;
-    margin: 15px 0;
-    font-size: 0.9em;
-    animation: glitch 1s infinite;
-}
-
-.bonus-text {
-    color: #00ff00;
-    text-shadow: 0 0 10px #00ff00;
-    margin: 10px 0;
-    font-size: 0.9em;
-}
-
-@keyframes glitch {
-    0% {
-        transform: translate(0);
-    }
-    20% {
-        transform: translate(-2px, 2px);
-    }
-    40% {
-        transform: translate(-2px, -2px);
-    }
-    60% {
-        transform: translate(2px, 2px);
-    }
-    80% {
-        transform: translate(2px, -2px);
-    }
-    100% {
-        transform: translate(0);
-    }
+    letter-spacing: 2px; /* Меньше разрядка */
+    margin-bottom: 15px;
+    font-size: 1.4em; /* Немного меньше */
+    text-shadow: 0 0 8px rgba(255, 214, 0, 0.7);
 }
 
 .game-over-content p, .win-content p {
-    margin: 8px 0;
-    font-size: 0.9em;
+    margin: 10px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
 }
 
+/* Стили для финального счета */
+#final-score, #final-score-win { /* Используйте один ID или разные */
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+    margin: 15px 0;
+}
+
+/* Промокод (если используется) */
+.promo-code {
+    font-weight: bold;
+    color: #ffd600;
+    font-size: 1.2em;
+    text-shadow: 0 0 8px #ffd600;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    border: 1px dashed rgba(255, 214, 0, 0.7);
+    display: inline-block;
+    margin: 15px 0;
+    background: rgba(255, 214, 0, 0.1);
+}
+
+/* Контролы для мобильных */
+.mobile-controls {
+    display: flex; /* Показываем по умолчанию */
+    justify-content: space-around; /* Распределяем кнопки */
+    align-items: center;
+    padding: 0 10%; /* Отступы по бокам */
+    margin-top: 10px; /* Отступ сверху */
+    width: 100%;
+}
+
+.mobile-controls button {
+    width: 65px; /* Размер кнопок */
+    height: 65px;
+    font-size: 28px; /* Размер иконки */
+    padding: 0;
+    border-radius: 50%; /* Круглые кнопки */
+    background-color: rgba(255, 214, 0, 0.8); /* Ярче фон */
+    border: none; /* Убрать рамку */
+    color: #000; /* Цвет иконки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation; /* Для лучшей отзывчивости на тач */
+    box-shadow: 0 4px 10px rgba(255, 214, 0, 0.4);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+/* Эффект при нажатии */
+.mobile-controls button:active {
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 5px rgba(255, 214, 0, 0.3);
+    transform: scale(0.95); /* Немного уменьшаем */
+}
+
+/* Убираем медиа-запрос для показа мобильных контролов, т.к. они теперь всегда видны */
+/* @media (max-width: 600px) { ... } */
+
+/* Сообщения об ошибках/бонусах */
+.error-message, .bonus-text {
+    margin: 10px 0;
+    font-size: 0.9em;
+    padding: 5px;
+    border-radius: 3px;
+}
+.error-message {
+    color: #ff4d4d;
+    background-color: rgba(255, 77, 77, 0.1);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    text-shadow: none;
+}
+.bonus-text {
+    color: #4dff4d;
+     background-color: rgba(77, 255, 77, 0.1);
+     border: 1px solid rgba(77, 255, 77, 0.3);
+    text-shadow: none;
+}
+
+/* Сообщение о столкновении */
 .collision-message {
-    color: #ff0033;
-    text-shadow: 0 0 10px #ff0033;
-    font-size: 0.8em;
+    color: #ff4d4d;
+    text-shadow: 0 0 5px #ff4d4d;
+    font-size: 0.85em;
+    font-weight: bold;
     z-index: 100;
-    animation: messageFloat 1s forwards;
+    animation: messageFloat 1s ease-out forwards;
     white-space: nowrap;
     font-family: 'Orbitron', Arial, sans-serif;
+    position: absolute; /* Добавлено для анимации */
+    pointer-events: none; /* Чтобы не мешало кликам */
 }
 
 @keyframes messageFloat {
     0% {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
     }
     100% {
-        transform: translateY(-50px);
+        transform: translateY(-40px) scale(0.8); /* Улетает вверх и уменьшается */
         opacity: 0;
     }
 }
 
+/* Кнопка звука (позиционирование в правом нижнем углу game-area) */
 .sound-button {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 100;
+    bottom: 8px; /* Отступы */
+    right: 8px;
+    z-index: 100; /* Поверх других элементов */
     cursor: pointer;
-    padding: 8px 12px;
-    font-size: 24px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #ffd600;
-    color: #ffd600;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
+    width: 45px;  /* Размер кнопки */
+    height: 45px;
+    padding: 0; /* Убираем внутренний отступ */
+    font-size: 22px; /* Размер иконки */
+    background: rgba(0, 0, 0, 0.6); /* Полупрозрачный фон */
+    border: 1px solid #ffd600; /* Рамка в цвет темы */
+    color: #ffd600; /* Цвет иконки */
+    border-radius: 50%; /* Круглая */
+    display: flex; /* Для центрирования иконки */
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .sound-button:hover {
-    background: rgba(255, 214, 0, 0.2);
+    background: rgba(255, 214, 0, 0.15);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6);
 }
 
 .sound-button:active {
     transform: scale(0.95);
-} 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* Медиа-запрос для тонкой настройки на совсем маленьких экранах */
+@media (max-width: 360px) {
+     .game-container {
+        padding: 10px;
+     }
+     .game-header {
+         padding: 5px 8px;
+         min-height: 40px;
+     }
+     .game-header .logo {
+        font-size: 14px; /* Еще меньше лого */
+        max-width: 45%;
+     }
+    .score-display,
+    .lives-display,
+    .game-header > div:first-child,
+    .game-header > div:last-child {
+        font-size: 0.75em; /* Еще меньше текст счета */
+        letter-spacing: 0.5px;
+    }
+     .game-area {
+        height: 300px; /* Можно уменьшить высоту поля */
+     }
+     .mobile-controls button {
+        width: 55px;
+        height: 55px;
+        font-size: 24px;
+     }
+     .sound-button {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        bottom: 5px;
+        right: 5px;
+     }
+     .restart-button {
+        padding: 8px 20px;
+        font-size: 1em;
+     }
+     .game-over-content h2, .win-content h2 {
+         font-size: 1.2em;
+     }
+}
